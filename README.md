@@ -12,6 +12,7 @@ Dikerjakan sebagai Project Mandiri, Politeknik Dewantara.
 | **Pengembang** | Annisa Jelita Putri (NIM 24404132) |
 | **Kelas** | TRM Web Design |
 | **Mata Kuliah** | Project Mandiri, Politeknik Dewantara |
+| **Repositori** | https://github.com/annisajelitaputri/sistem-monitoring |
 
 ## Fitur
 
@@ -94,7 +95,7 @@ Buka **Terminal** Laragon, lalu jalankan:
 
 ```bash
 cd C:\laragon\www
-git clone <URL-REPOSITORI> sistem-monitoring
+git clone https://github.com/annisajelitaputri/sistem-monitoring.git
 cd sistem-monitoring
 ```
 
