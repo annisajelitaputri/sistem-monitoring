@@ -9,10 +9,11 @@ class AbsensiSiswa extends Model
 {
     protected $table = 'absensi_siswa';
     public $timestamps = false;
-    protected $fillable = ['siswa_id', 'kelas_id', 'tanggal', 'status', 'keterangan', 'dicatat_oleh'];
+    protected $fillable = ['siswa_id', 'kelas_id', 'mapel_id', 'tanggal', 'status', 'keterangan', 'dicatat_oleh'];
     protected $casts = ['tanggal' => 'date'];
 
     public function siswa(): BelongsTo { return $this->belongsTo(Siswa::class); }
     public function kelas(): BelongsTo { return $this->belongsTo(Kelas::class); }
+    public function mapel(): BelongsTo { return $this->belongsTo(Mapel::class); }
     public function pencatat(): BelongsTo { return $this->belongsTo(User::class, 'dicatat_oleh'); }
 }

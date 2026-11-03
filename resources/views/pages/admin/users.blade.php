@@ -21,6 +21,14 @@
     <button type="button" class="mg-btn-primary" onclick="openCreate()">+ Tambah akun</button>
 </form>
 
+{{-- Buat akun massal untuk guru yang belum punya akun (username & sandi awal = NIP) --}}
+<form method="POST" action="{{ route('admin.users.generate') }}"
+      onsubmit="return confirm('Buat akun untuk semua guru yang belum punya akun? Username dan kata sandi awal = NIP.')"
+      style="margin-bottom:12px">
+    @csrf
+    <button type="submit" class="mg-btn">Buat akun untuk semua guru</button>
+</form>
+
 <div class="mg-card">
     <table class="mg-table">
         <thead>
@@ -28,6 +36,7 @@
                 <th style="width:56px">No</th>
                 <th>Nama</th>
                 <th style="width:200px">Username</th>
+                <th style="width:130px">Password</th>
                 <th style="width:140px">Peran</th>
                 <th style="width:130px">Status</th>
                 <th style="width:170px">Aksi</th>
@@ -39,6 +48,7 @@
                     <td>{{ $users->firstItem() + $i }}</td>
                     <td><strong>{{ $u->name }}</strong></td>
                     <td>{{ $u->username }}</td>
+                    <td><span title="Password disimpan terenkripsi (hash). Ganti lewat tombol Edit.">••••••••</span></td>
                     <td>
                         <span class="mg-badge {{ $u->role === 'admin' ? 'mg-blue' : 'mg-gray' }}">
                             {{ ucfirst($u->role) }}
@@ -76,7 +86,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="mg-empty">Belum ada akun.</td></tr>
+                <tr><td colspan="7" class="mg-empty">Belum ada akun.</td></tr>
             @endforelse
         </tbody>
     </table>
@@ -96,7 +106,7 @@
             <input type="text" name="name" id="fName" class="mg-input" required maxlength="150">
 
             <label for="fUsername">Username</label>
-            <input type="text" name="username" id="fUsername" class="mg-input" required maxlength="50">
+            <input type="text" name="username" id="fUsername" class="mg-input" required maxlength="50" autocomplete="off">
 
             <label for="fPassword">Password <small id="fHint"></small></label>
             <input type="password" name="password" id="fPassword" class="mg-input" minlength="6" autocomplete="new-password">
@@ -162,6 +172,7 @@
         form.action = storeUrl;
         methodInput.disabled = true;
         pwd.required = true;
+        pwd.value = '';
         document.getElementById('mgTitle').textContent = 'Tambah akun';
         document.getElementById('fHint').textContent = '';
         syncRole();
@@ -173,6 +184,7 @@
         form.action = updateUrl.replace('__ID__', btn.dataset.id);
         methodInput.disabled = false;
         pwd.required = false;
+        pwd.value = ''; // cegah autofill browser mengisi password lama
         document.getElementById('mgTitle').textContent = 'Edit akun';
         document.getElementById('fName').value = btn.dataset.name;
         document.getElementById('fUsername').value = btn.dataset.username;

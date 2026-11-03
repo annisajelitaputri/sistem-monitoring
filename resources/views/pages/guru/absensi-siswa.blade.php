@@ -7,14 +7,26 @@
 @section('content')
 <div class="gp">
 
-    {{-- Filter kelas & tanggal --}}
+    {{-- Filter kelas, mapel & tanggal --}}
     <form method="GET" action="{{ route('guru.absensi-siswa.index') }}" class="gp-filter">
         <label for="kelas_id">Kelas</label>
-        <div class="gp-select-wrap" style="width:220px">
-            <select name="kelas_id" id="kelas_id" class="gp-input gp-select">
+        <div class="gp-select-wrap" style="width:200px">
+            <select name="kelas_id" id="kelas_id" class="gp-input gp-select"
+                    onchange="this.form.mapel_id.selectedIndex = -1; this.form.submit()">
                 @foreach ($kelasList as $k)
                     <option value="{{ $k->id }}" @selected($kelasId === $k->id)>{{ $k->nama_kelas }}</option>
                 @endforeach
+            </select>
+        </div>
+
+        <label for="mapel_id">Mapel</label>
+        <div class="gp-select-wrap" style="width:240px">
+            <select name="mapel_id" id="mapel_id" class="gp-input gp-select" onchange="this.form.submit()">
+                @forelse ($mapelList as $m)
+                    <option value="{{ $m->id }}" @selected($mapelId === $m->id)>{{ $m->nama }}</option>
+                @empty
+                    <option value="">Belum ada mapel</option>
+                @endforelse
             </select>
         </div>
 
@@ -24,10 +36,18 @@
         <button type="submit" class="gp-btn">Tampilkan</button>
     </form>
 
+    @if ($errors->any())
+        <div class="gp-empty" style="color:#b91c1c">{{ $errors->first() }}</div>
+    @endif
+
+    @if (! $mapelId)
+        <div class="gp-empty">Belum ada mapel untuk kelas ini. Tambahkan data mapel di panel admin terlebih dahulu.</div>
+    @else
     {{-- Form simpan --}}
     <form method="POST" action="{{ route('guru.absensi-siswa.store') }}">
         @csrf
         <input type="hidden" name="kelas_id" value="{{ $kelasId }}">
+        <input type="hidden" name="mapel_id" value="{{ $mapelId }}">
         <input type="hidden" name="tanggal" value="{{ $tanggal }}">
 
         <section class="gp-card">
@@ -79,6 +99,7 @@
             </div>
         @endif
     </form>
+    @endif
 
 </div>
 @endsection

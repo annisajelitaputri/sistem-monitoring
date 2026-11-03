@@ -1,10 +1,23 @@
 @extends('layouts.situs')
 
+@php
+    // Ubah nomor di config (mis. 087731242003) menjadi format internasional 6287731242003
+    $wa = preg_replace('/\D/', '', config('sekolah.telepon'));
+    $wa = str_starts_with($wa, '0') ? '62' . substr($wa, 1) : $wa;
+    $waPesan = rawurlencode('Assalamu\'alaikum, saya ingin bertanya tentang ' . config('sekolah.nama', 'SMKN 9 Luwu') . '.');
+@endphp
+
 @section('title', 'Kontak')
 @section('crumb', 'Kontak')
 @section('hero-title', 'Hubungi Kami')
 @section('hero-text', 'Punya pertanyaan seputar sekolah? Kunjungi kami atau hubungi lewat kontak resmi di bawah ini.')
 @section('hero-icon', 'phone')
+
+@push('styles')
+<style>
+    .st-ic-green { background: linear-gradient(135deg, #16a34a, #25d366); }
+</style>
+@endpush
 
 @section('content')
     <div class="st-kontak">
@@ -19,10 +32,16 @@
             </div>
 
             <div class="st-info">
-                <span class="st-info-ic st-ic-teal">@include('partials.situs-icon', ['n' => 'phone', 's' => 28, 'w' => 1.8])</span>
+                <span class="st-info-ic st-ic-green">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
+                </span>
                 <div>
-                    <small>Telepon</small>
-                    <strong><a href="tel:+62{{ ltrim(config('sekolah.telepon'), '0') }}">{{ config('sekolah.telepon') }}</a></strong>
+                    <small>WhatsApp</small>
+                    <strong>
+                        <a href="https://wa.me/{{ $wa }}?text={{ $waPesan }}" target="_blank" rel="noopener noreferrer">
+                            {{ config('sekolah.telepon') }}
+                        </a>
+                    </strong>
                 </div>
             </div>
 

@@ -385,6 +385,107 @@ function drawLineChart(el, labels, values) {
 
     svg += '</svg>';
     el.innerHTML = svg;
+
+  /* ==================== DATA MAPEL ==================== */
+/* TEMPEL di paling bawah file JS admin Anda */
+(function () {
+    function initMapel() {
+        var modal = document.getElementById('mpModal');
+        var form = document.getElementById('mpForm');
+        if (!modal || !form) return; // bukan halaman mapel
+
+        var title = document.getElementById('mpModalTitle');
+        var method = document.getElementById('mpMethod');
+        var mode = document.getElementById('mpMode');
+        var idField = document.getElementById('mpId');
+        var kode = document.getElementById('mpKode');
+        var nama = document.getElementById('mpNama');
+
+        function openModal() {
+            modal.classList.add('show');
+            modal.setAttribute('aria-hidden', 'false');
+            setTimeout(function () { kode.focus(); }, 50);
+        }
+
+        function closeModal() {
+            modal.classList.remove('show');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function modeTambah() {
+            title.textContent = 'Tambah mapel';
+            form.action = form.getAttribute('data-store-url');
+            method.value = 'POST';
+            mode.value = 'tambah';
+            idField.value = '';
+            kode.value = '';
+            nama.value = '';
+        }
+
+        function modeEdit(action, kodeVal, namaVal) {
+            title.textContent = 'Edit mapel';
+            form.action = action;
+            method.value = 'PUT';
+            mode.value = 'edit';
+            kode.value = kodeVal;
+            nama.value = namaVal;
+
+            var match = action.match(/\/(\d+)$/);
+            idField.value = match ? match[1] : '';
+        }
+
+        var btnTambah = document.getElementById('mpBtnTambah');
+        if (btnTambah) {
+            btnTambah.addEventListener('click', function () {
+                modeTambah();
+                openModal();
+            });
+        }
+
+        document.querySelectorAll('.mp-btn-edit').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                modeEdit(
+                    btn.getAttribute('data-action'),
+                    btn.getAttribute('data-kode'),
+                    btn.getAttribute('data-nama')
+                );
+                openModal();
+            });
+        });
+
+        var btnBatal = document.getElementById('mpBtnBatal');
+        if (btnBatal) btnBatal.addEventListener('click', closeModal);
+
+        modal.addEventListener('click', function (e) {
+            if (e.target === modal) closeModal();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        document.querySelectorAll('.mp-aksi form[data-confirm]').forEach(function (f) {
+            f.addEventListener('submit', function (e) {
+                if (!confirm(f.getAttribute('data-confirm'))) e.preventDefault();
+            });
+        });
+
+        var reopen = document.getElementById('mpReopen');
+        if (reopen) {
+            if (reopen.getAttribute('data-mode') === 'edit' && reopen.getAttribute('data-action')) {
+                modeEdit(reopen.getAttribute('data-action'), kode.value, nama.value);
+            }
+            openModal();
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMapel);
+    } else {
+        initMapel();
+    }
+})();
+
 }
 
 /* =====================================================
@@ -754,3 +855,5 @@ document.addEventListener("DOMContentLoaded", () => {
   setupNavbar();
   setupReveal();
 });
+
+

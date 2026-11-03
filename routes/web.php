@@ -5,6 +5,7 @@ use App\Http\Controllers\PublicSite\BerandaController;
 use App\Http\Controllers\PublicSite\ProfilController;
 use App\Http\Controllers\PublicSite\KegiatanController;
 use App\Http\Controllers\PublicSite\BeritaController;
+use App\Http\Controllers\PublicSite\KontakController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\SiswaController as AdminSiswaController;
@@ -19,8 +20,6 @@ use App\Http\Controllers\Guru\DashboardController as GuruDashboardController;
 use App\Http\Controllers\Guru\AbsensiSiswaController as GuruAbsensiSiswaController;
 use App\Http\Controllers\Guru\AbsenSayaController;
 use App\Http\Controllers\Guru\RekapKelasController as GuruRekapKelasController;
-use App\Http\Controllers\PublicSite\KontakController;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -32,10 +31,12 @@ use App\Http\Controllers\PublicSite\KontakController;
 Route::get('/', [BerandaController::class, 'index'])->name('beranda');
 Route::get('/profil', [ProfilController::class, 'index'])->name('profil');
 Route::get('/guru', [ProfilController::class, 'tenagaPendidik'])->name('guru');
+Route::get('/guru/{guru}', [ProfilController::class, 'guruDetail'])
+    ->whereNumber('guru')
+    ->name('guru.show');
 Route::get('/kegiatan', [KegiatanController::class, 'index'])->name('kegiatan');
-Route::get('/berita', [BeritaController::class, 'index'])->name('berita');
-// 2) Di bagian HALAMAN PUBLIK: ganti route /kontak lama dan tambahkan dua route detail
 Route::get('/kegiatan/{kegiatan}', [KegiatanController::class, 'show'])->name('kegiatan.show');
+Route::get('/berita', [BeritaController::class, 'index'])->name('berita');
 Route::get('/berita/{berita}', [BeritaController::class, 'show'])->name('berita.show');
 Route::get('/kontak', [KontakController::class, 'index'])->name('kontak');
 
@@ -44,9 +45,8 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-
-// ===== ADMIN / TU =====
-Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
+// ===== ADMIN / TU (hanya role admin) =====
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Data siswa & kelas
@@ -58,7 +58,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
         ->only(['index', 'store', 'update', 'destroy']);
 
     // Data guru -> admin.guru.index / store / update / destroy
-    Route::resource('guru', AdminGuruController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::resource('guru', AdminGuruController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
 
     // Absensi guru -> admin.absensi-guru.index / koreksi
     Route::get('absensi-guru', [AdminAbsensiGuruController::class, 'index'])->name('absensi-guru.index');
@@ -69,24 +70,30 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::get('rekap/pdf', [AdminRekapController::class, 'pdf'])->name('rekap.pdf');
     Route::get('rekap/excel', [AdminRekapController::class, 'excel'])->name('rekap.excel');
 
-    // Kelola berita -> admin.berita.index / store / update / destroy
+    // Kelola berita
     Route::resource('berita', AdminBeritaController::class)
         ->parameters(['berita' => 'berita'])
         ->only(['index', 'store', 'update', 'destroy']);
 
-    // Kelola kegiatan -> admin.kegiatan.index / store / update / destroy
+    // Kelola kegiatan
     Route::resource('kegiatan', AdminKegiatanController::class)
         ->parameters(['kegiatan' => 'kegiatan'])
         ->only(['index', 'store', 'update', 'destroy']);
 
-    // Akun pengguna -> admin.users.index / store / update / destroy
+    // Akun pengguna -> admin.users.index / store / update / destroy / generate
+    // (route generate harus di atas resource)
+    Route::post('users/generate', [AdminUserController::class, 'generate'])->name('users.generate');
     Route::resource('users', AdminUserController::class)
         ->parameters(['users' => 'user'])
         ->only(['index', 'store', 'update', 'destroy']);
+
+    // Data mapel
+    Route::resource('mapel', \App\Http\Controllers\Admin\MapelController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
 });
 
-// ===== GURU =====
-Route::middleware('auth')->group(function () {
+// ===== GURU (hanya role guru) =====
+Route::middleware(['auth', 'role:guru'])->group(function () {
 
     // Dashboard
     Route::get('/guru/dashboard', [GuruDashboardController::class, 'index'])

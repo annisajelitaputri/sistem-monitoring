@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -24,15 +26,27 @@ class LoginController extends Controller
         ]);
 
         // Login memakai kolom "username" (admin: "admin", guru: NIP)
+        $username = trim($request->login);
+
+        // ===== DEBUG SEMENTARA (hapus setelah masalah selesai) =====
+        $u = User::where('username', $username)->first();
+        logger('LOGIN DEBUG', [
+            'input_login'    => $username,
+            'user_ditemukan' => (bool) $u,
+            'status_akun'    => $u->status ?? null,
+            'panjang_sandi'  => strlen((string) $request->password),
+            'sandi_cocok'    => $u ? Hash::check($request->password, $u->password) : null,
+        ]);
+        // ===== AKHIR DEBUG =====
+
         $credentials = [
-            'username' => $request->login,
+            'username' => $username,
             'password' => $request->password,
         ];
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            // Arahkan sesuai role (kolom "role" pada tabel users: admin / guru)
             $role = Auth::user()->role ?? null;
 
             return match ($role) {

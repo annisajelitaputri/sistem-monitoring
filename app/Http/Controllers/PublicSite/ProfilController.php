@@ -15,6 +15,7 @@ class ProfilController extends Controller
     public function tenagaPendidik()
     {
         $guru = Guru::where('status', 'aktif')
+            ->where('tampil_di_web', true)
             ->orderBy('nama')
             ->get();
 
@@ -28,6 +29,13 @@ class ProfilController extends Controller
         ];
 
         return view('pages.public.tenaga-pendidik', compact('guru', 'data'));
+    }
+
+    public function guruDetail(Guru $guru)
+    {
+        abort_unless($guru->status === 'aktif' && $guru->tampil_di_web, 404);
+
+        return view('pages.public.guru-detail', compact('guru'));
     }
 
     public function kontak()

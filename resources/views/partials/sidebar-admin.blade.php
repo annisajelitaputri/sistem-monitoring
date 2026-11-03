@@ -1,21 +1,23 @@
 @php
-    // Menu sidebar. Ganti 'route' dengan nama route sungguhan setelah halamannya dibuat.
     $menu = [
-        ['label' => 'Dashboard',        'icon' => 'layout-dashboard', 'route' => 'admin.dashboard',          'active' => 'admin.dashboard'],
-        ['label' => 'Data siswa',       'icon' => 'users',            'route' => 'admin.siswa.index',        'active' => 'admin.siswa.*'],
-        ['label' => 'Data guru',        'icon' => 'user',             'route' => 'admin.guru.index',         'active' => 'admin.guru.*'],
-        ['label' => 'Data kelas',       'icon' => 'book',             'route' => 'admin.kelas.index',        'active' => 'admin.kelas.*'],
-        ['label' => 'Absensi guru',     'icon' => 'square-check',     'route' => 'admin.absensi-guru.index', 'active' => 'admin.absensi-guru.*'],
-        ['label' => 'Rekap dan ekspor', 'icon' => 'file-text',        'route' => 'admin.rekap.index',        'active' => 'admin.rekap.*'],
-        ['label' => 'Kelola berita',    'icon' => 'newspaper',        'route' => 'admin.berita.index',       'active' => 'admin.berita.*'],
-        ['label' => 'Kelola kegiatan',  'icon' => 'calendar-days',    'route' => 'admin.kegiatan.index',     'active' => 'admin.kegiatan.*'],
-        ['label' => 'Akun pengguna',    'icon' => 'key-round',        'route' => 'admin.users.index',        'active' => 'admin.users.*'],
+        ['route' => 'admin.dashboard',          'match' => 'admin.dashboard',      'icon' => 'layout-dashboard', 'label' => 'Dashboard'],
+        ['route' => 'admin.siswa.index',        'match' => 'admin.siswa.*',        'icon' => 'users',            'label' => 'Data siswa'],
+        ['route' => 'admin.guru.index',         'match' => 'admin.guru.*',         'icon' => 'user',             'label' => 'Data guru'],
+        ['route' => 'admin.kelas.index',        'match' => 'admin.kelas.*',        'icon' => 'tablet',           'label' => 'Data kelas'],
+        ['route' => 'admin.mapel.index',        'match' => 'admin.mapel.*',        'icon' => 'book-open',        'label' => 'Data mapel'],
+        ['route' => 'admin.absensi-guru.index', 'match' => 'admin.absensi-guru.*', 'icon' => 'square-check',     'label' => 'Absensi guru'],
+        ['route' => 'admin.rekap.index',        'match' => 'admin.rekap.*',        'icon' => 'file-text',        'label' => 'Rekap dan ekspor'],
+        ['route' => 'admin.berita.index',       'match' => 'admin.berita.*',       'icon' => 'newspaper',        'label' => 'Kelola berita'],
+        ['route' => 'admin.kegiatan.index',     'match' => 'admin.kegiatan.*',     'icon' => 'calendar-days',    'label' => 'Kelola kegiatan'],
+        ['route' => 'admin.users.index',        'match' => 'admin.users.*',        'icon' => 'key-round',        'label' => 'Akun pengguna'],
     ];
 @endphp
 
 <aside class="adm-sidebar" id="admSidebar">
     <a href="{{ route('admin.dashboard') }}" class="adm-brand">
-        <span class="adm-brand-logo"><img src="{{ asset('assets/images/logo.png') }}" alt="Logo"></span>
+        <span class="adm-brand-logo">
+            <img src="{{ asset('storage/publik/logo.png') }}" alt="Logo SMKN 9 Luwu">
+        </span>
         <span class="adm-brand-text">
             <strong>SMKN 9 Luwu</strong>
             <small>Monitoring Absensi</small>
@@ -27,7 +29,7 @@
     <nav class="adm-menu">
         @foreach ($menu as $m)
             <a href="{{ Route::has($m['route']) ? route($m['route']) : '#' }}"
-               class="{{ request()->routeIs($m['active']) ? 'active' : '' }}">
+               class="{{ request()->routeIs($m['match']) ? 'active' : '' }}">
                 <i data-lucide="{{ $m['icon'] }}"></i>
                 <span>{{ $m['label'] }}</span>
             </a>
@@ -36,6 +38,9 @@
 
     <form method="POST" action="{{ route('logout') }}" class="adm-logout">
         @csrf
-        <button type="submit"><i data-lucide="log-out"></i> <span>Logout</span></button>
+        <button type="submit">
+            <i data-lucide="log-out"></i>
+            <span>Logout</span>
+        </button>
     </form>
 </aside>

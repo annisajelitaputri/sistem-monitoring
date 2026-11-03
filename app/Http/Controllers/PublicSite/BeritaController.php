@@ -30,4 +30,11 @@ class BeritaController extends Controller
 
         return view('pages.public.berita', compact('beritas', 'utama', 'kategori'));
     }
+
+    public function show(Berita $berita)
+    {
+        abort_unless(strtolower($berita->status) === 'terbit', 404);
+
+        return view('pages.public.detail-berita', compact('berita'));
+    }
 }

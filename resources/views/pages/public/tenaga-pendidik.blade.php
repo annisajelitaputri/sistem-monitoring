@@ -4,12 +4,35 @@
 
 @push('styles')
     <link rel="stylesheet" href="{{ asset('assets/css/tenaga-pendidik.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/guru-detail.css') }}">
 @endpush
 
 @section('content')
+@php
+    $kepsek = $kepsek ?? \App\Models\Guru::where('status', 'aktif')
+        ->where('jabatan', 'like', '%kepala sekolah%')
+        ->first();
+
+    $guru = collect($guru ?? $gurus ?? [])
+        ->when($kepsek, fn ($c) => $c->reject(fn ($g) => $g->id === $kepsek->id));
+
+    $fotoUrl = function ($path) {
+        $path = is_array($path) ? (string) reset($path) : (string) $path;
+
+        if (\Illuminate\Support\Str::startsWith($path, ['http://', 'https://', '//'])) {
+            return $path;
+        }
+
+        $path = ltrim($path, '/');
+
+        return \Illuminate\Support\Str::startsWith($path, 'storage/')
+            ? asset($path)
+            : asset('storage/' . $path);
+    };
+@endphp
+
 <main class="tenaga-page">
 
-    {{-- Hero: ganti NAMA-FOTO-HERO.jpg dengan foto yang dipakai di halaman Profil --}}
     <section
         class="tenaga-hero"
         style="--hero-img: url('{{ asset('assets/img/NAMA-FOTO-HERO.jpg') }}')"
@@ -36,75 +59,75 @@
     <section class="tenaga-section">
         <div class="tenaga-container">
 
-            {{-- Kepala sekolah --}}
             <div class="tenaga-heading">
                 <h2>Kepala Sekolah</h2>
                 <p>Pimpinan yang mengarahkan perkembangan dan mutu pendidikan sekolah.</p>
             </div>
 
-            <article class="kepsek-card">
-                <div class="tenaga-foto kepsek-foto">
-                    @if (!empty($data['kepala_sekolah']['foto']))
-                        <img
-                            src="{{ $data['kepala_sekolah']['foto'] }}"
-                            alt="{{ $data['kepala_sekolah']['nama'] }}"
-                        >
-                    @else
-                        <x-icon name="users" />
-                    @endif
-                </div>
+            @if ($kepsek)
+                <article class="kepsek-card">
+                    <div class="tenaga-foto kepsek-foto">
+                        @if (!empty($kepsek->foto))
+                            <img
+                                src="{{ $fotoUrl($kepsek->foto) }}"
+                                alt="{{ $kepsek->nama }}"
+                            >
+                        @else
+                            <x-icon name="users" />
+                        @endif
+                    </div>
 
-                <div class="kepsek-info">
-                    <span class="tenaga-jabatan">KEPALA SEKOLAH</span>
-                    <h3>{{ $data['kepala_sekolah']['nama'] }}</h3>
+                    <div class="kepsek-info">
+                        <span class="tenaga-jabatan">KEPALA SEKOLAH</span>
+                        <h3>{{ $kepsek->nama }}</h3>
 
-                    @if (!empty($data['kepala_sekolah']['nip']))
-                        <p>NIP: {{ $data['kepala_sekolah']['nip'] }}</p>
-                    @endif
+                        @if (!empty($kepsek->nip))
+                            <p>NIP: {{ $kepsek->nip }}</p>
+                        @endif
+                    </div>
+                </article>
+            @else
+                <p class="tenaga-kosong">Data kepala sekolah belum tersedia.</p>
+            @endif
 
-                    @if (!empty($data['kepala_sekolah']['sambutan']))
-                        <p class="kepsek-sambutan">
-                            {{ $data['kepala_sekolah']['sambutan'] }}
-                        </p>
-                    @endif
-                </div>
-            </article>
-
-            {{-- Daftar guru --}}
             <div class="tenaga-heading guru-heading">
                 <h2>Daftar Guru</h2>
-                <p>Tenaga pendidik yang berkontribusi dalam proses pembelajaran.</p>
+                <p>Tenaga pendidik yang berkontribusi dalam proses pembelajaran. Klik kartu untuk melihat profil lengkap.</p>
             </div>
 
             <div class="tenaga-grid">
                 @forelse ($guru as $item)
-                    <article class="guru-card">
-                        <div class="tenaga-foto guru-foto">
-                            @if (!empty($item['foto']))
-                                <img
-                                    src="{{ $item['foto'] }}"
-                                    alt="{{ $item['nama'] }}"
-                                    loading="lazy"
-                                >
-                            @else
-                                <x-icon name="users" />
-                            @endif
-                        </div>
+                    <a href="{{ route('guru.show', $item) }}" class="guru-card-link" aria-label="Lihat profil {{ $item->nama }}">
+                        <article class="guru-card">
+                            <div class="tenaga-foto guru-foto">
+                                @if (!empty($item->foto))
+                                    <img
+                                        src="{{ $fotoUrl($item->foto) }}"
+                                        alt="{{ $item->nama }}"
+                                        loading="lazy"
+                                    >
+                                @else
+                                    <x-icon name="users" />
+                                @endif
+                            </div>
 
-                        <div class="guru-info">
-                            <h3>{{ $item['nama'] }}</h3>
+                            <div class="guru-info">
+                                <h3>{{ $item->nama }}</h3>
 
-                            @if (!empty($item['jabatan']))
-                                <p class="guru-jabatan">{{ $item['jabatan'] }}</p>
-                            @endif
+                                @if (count($item->jabatan_list))
+                                    <p class="guru-jabatan">{{ implode(' • ', $item->jabatan_list) }}</p>
+                                @endif
 
-                            @if (!empty($item['mapel']))
-                                <p class="guru-mapel">
-                                    Mata Pelajaran: {{ $item['mapel'] }}
-                                </p>
-                            @endif
-                        </div>
-                    </article>
+                                @if (count($item->mapel_list))
+                                    <p class="guru-mapel">
+                                        Mata Pelajaran: {{ implode(', ', $item->mapel_list) }}
+                                    </p>
+                                @endif
+
+                                <span class="guru-lihat">Lihat profil &rarr;</span>
+                            </div>
+                        </article>
+                    </a>
                 @empty
                     <p class="tenaga-kosong">
                         Data tenaga pendidik belum tersedia.

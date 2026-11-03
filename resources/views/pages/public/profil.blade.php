@@ -27,7 +27,7 @@
         [
             'nama' => 'Laboratorium TKJ',
             'keterangan' => 'Ruang praktik komputer dan jaringan.',
-            'foto' => null,
+            'foto' => 'lab.kom.jpeg',
         ],
         [
             'nama' => 'Perpustakaan',

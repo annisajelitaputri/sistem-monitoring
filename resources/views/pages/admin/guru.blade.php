@@ -25,16 +25,20 @@
             <tr>
                 <th style="width:56px">No</th>
                 <th style="width:76px">Foto</th>
-                <th style="width:200px">NIP</th>
+                <th style="width:170px">NIP</th>
                 <th>Nama</th>
-                <th class="center" style="width:190px">Jabatan</th>
-                <th style="width:150px">Mapel</th>
-                <th style="width:120px">Status</th>
+                <th style="width:220px">Jabatan</th>
+                <th style="width:200px">Mapel</th>
+                <th style="width:110px">Status</th>
                 <th style="width:180px">Aksi</th>
             </tr>
             </thead>
             <tbody>
             @forelse ($gurus as $i => $g)
+                @php
+                    $jabatanList = $g->jabatan_list;
+                    $mapelListGuru = $g->mapel_list;
+                @endphp
                 <tr>
                     <td>{{ $gurus->firstItem() + $i }}</td>
                     <td>
@@ -47,9 +51,14 @@
                         </span>
                     </td>
                     <td class="nip">{{ $g->nip }}</td>
-                    <td><strong>{{ $g->nama }}</strong></td>
-                    <td class="center">{{ $g->jabatan }}</td>
-                    <td>{{ $g->mapel ?: '-' }}</td>
+                    <td>
+                        <strong>{{ $g->nama }}</strong>
+                        @if ($g->bio)
+                            <div style="font-size:12px;color:#6b7280;font-style:italic">{{ \Illuminate\Support\Str::limit($g->bio, 70) }}</div>
+                        @endif
+                    </td>
+                    <td>{{ count($jabatanList) ? implode(', ', $jabatanList) : '-' }}</td>
+                    <td>{{ count($mapelListGuru) ? implode(', ', $mapelListGuru) : '-' }}</td>
                     <td>
                         <span class="badge {{ $g->status === 'aktif' ? 'badge-green' : 'badge-gray' }}">{{ ucfirst($g->status) }}</span>
                     </td>
@@ -59,8 +68,11 @@
                                     data-open-modal="modalGuru" data-mode="edit"
                                     data-action="{{ route('admin.guru.update', $g) }}"
                                     data-nip="{{ $g->nip }}" data-nama="{{ $g->nama }}"
-                                    data-jabatan="{{ $g->jabatan }}" data-mapel="{{ $g->mapel }}"
-                                    data-status="{{ $g->status }}">Edit</button>
+                                    data-status="{{ $g->status }}"
+                                    data-pendidikan-val="{{ $g->pendidikan }}"
+                                    data-bio-val="{{ $g->bio }}"
+                                    data-jabatan-json="{{ json_encode($jabatanList) }}"
+                                    data-mapel-json="{{ json_encode($mapelListGuru) }}">Edit</button>
 
                             <form method="POST" action="{{ route('admin.guru.destroy', $g) }}" data-confirm="Hapus guru {{ $g->nama }}?">
                                 @csrf @method('DELETE')
@@ -100,14 +112,36 @@
                     <span>Nama lengkap dan gelar</span>
                     <input type="text" name="nama" class="input" value="{{ old('nama') }}" required>
                 </label>
+
+                <div class="field">
+                    <span>Jabatan (bisa lebih dari satu)</span>
+                    <div id="jabatanWrap"></div>
+                    <button type="button" class="btn-edit" id="tambahJabatan" style="margin-top:8px">+ Tambah jabatan</button>
+                </div>
+
+                <div class="field">
+                    <span>Mapel yang dibawakan (bisa pilih lebih dari satu)</span>
+                    <div id="mapelWrap" style="display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;max-height:170px;overflow-y:auto;padding:10px;border:1px solid #e5e7eb;border-radius:10px;background:#fff">
+                        @forelse ($mapelList as $m)
+                            <label style="display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer">
+                                <input type="checkbox" name="mapel[]" value="{{ $m->nama }}" @checked(in_array($m->nama, old('mapel', []), true))>
+                                {{ $m->nama }}
+                            </label>
+                        @empty
+                            <span style="font-size:13px;color:#6b7280">Belum ada data mapel. Isi dulu di menu Data mapel.</span>
+                        @endforelse
+                    </div>
+                </div>
+
                 <label class="field">
-                    <span>Jabatan</span>
-                    <input type="text" name="jabatan" class="input" placeholder="Contoh: Wali Kelas" value="{{ old('jabatan') }}" required>
+                    <span>Pendidikan terakhir (opsional)</span>
+                    <input type="text" name="pendidikan" class="input" maxlength="255" placeholder="Contoh: S1 Pendidikan Matematika, UNM" value="{{ old('pendidikan') }}">
                 </label>
                 <label class="field">
-                    <span>Mapel</span>
-                    <input type="text" name="mapel" class="input" placeholder="Contoh: Matematika" value="{{ old('mapel') }}">
+                    <span>Bio / motto (opsional)</span>
+                    <textarea name="bio" class="input" rows="4" maxlength="2000" placeholder="Contoh: Guru Matematika sejak 2010. Motto: Belajar sepanjang hayat.">{{ old('bio') }}</textarea>
                 </label>
+
                 <label class="field">
                     <span>Status</span>
                     <div class="select-wrap">
@@ -129,4 +163,73 @@
             </form>
         </div>
     </div>
+
+    <script>
+    (function () {
+        const modal = document.getElementById('modalGuru');
+        const form  = modal.querySelector('form');
+        const wrap  = document.getElementById('jabatanWrap');
+
+        function addRow(value) {
+            const row = document.createElement('div');
+            row.style.cssText = 'display:flex;gap:8px;margin-bottom:8px';
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.name = 'jabatan[]';
+            input.className = 'input';
+            input.maxLength = 100;
+            input.placeholder = 'Contoh: Wali Kelas X TKR';
+            input.value = value || '';
+
+            const hapus = document.createElement('button');
+            hapus.type = 'button';
+            hapus.className = 'btn-delete';
+            hapus.textContent = 'Hapus';
+            hapus.addEventListener('click', function () {
+                if (wrap.children.length > 1) { row.remove(); } else { input.value = ''; }
+            });
+
+            row.appendChild(input);
+            row.appendChild(hapus);
+            wrap.appendChild(row);
+        }
+
+        function setJabatan(list) {
+            wrap.innerHTML = '';
+            (list && list.length ? list : ['']).forEach(addRow);
+        }
+
+        function setMapel(list) {
+            form.querySelectorAll('input[name="mapel[]"]').forEach(function (c) {
+                c.checked = list.indexOf(c.value) !== -1;
+            });
+        }
+
+        document.getElementById('tambahJabatan').addEventListener('click', function () { addRow(''); });
+
+        setJabatan(@json(array_values((array) old('jabatan', ['']))));
+
+        document.querySelectorAll('[data-open-modal="modalGuru"]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                setTimeout(function () {
+                    if (btn.dataset.mode === 'edit') {
+                        form.elements['nip'].value        = btn.dataset.nip || '';
+                        form.elements['nama'].value       = btn.dataset.nama || '';
+                        form.elements['status'].value     = btn.dataset.status || 'aktif';
+                        form.elements['pendidikan'].value = btn.dataset.pendidikanVal || '';
+                        form.elements['bio'].value        = btn.dataset.bioVal || '';
+                        setJabatan(JSON.parse(btn.dataset.jabatanJson || '[]'));
+                        setMapel(JSON.parse(btn.dataset.mapelJson || '[]'));
+                    } else {
+                        form.elements['pendidikan'].value = '';
+                        form.elements['bio'].value        = '';
+                        setJabatan(['']);
+                        setMapel([]);
+                    }
+                }, 0);
+            });
+        });
+    })();
+    </script>
 @endsection

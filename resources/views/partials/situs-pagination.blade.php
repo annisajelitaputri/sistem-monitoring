@@ -3,7 +3,7 @@
         @if ($paginator->onFirstPage())
             <span class="st-pg st-pg-off">Sebelumnya</span>
         @else
-            <a class="st-pg st-pg-nav" href="{{ $paginator->previousPageUrl() }}">Sebelumnya</a>
+            <a class="st-pg" href="{{ $paginator->previousPageUrl() }}" rel="prev">Sebelumnya</a>
         @endif
 
         @foreach ($elements as $element)
@@ -22,7 +22,7 @@
         @endforeach
 
         @if ($paginator->hasMorePages())
-            <a class="st-pg st-pg-nav" href="{{ $paginator->nextPageUrl() }}">Berikutnya</a>
+            <a class="st-pg st-pg-nav" href="{{ $paginator->nextPageUrl() }}" rel="next">Berikutnya</a>
         @else
             <span class="st-pg st-pg-off">Berikutnya</span>
         @endif

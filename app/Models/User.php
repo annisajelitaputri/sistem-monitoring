@@ -11,7 +11,7 @@ class User extends Authenticatable
 {
     use Notifiable;
 
-    protected $fillable = ['name', 'username', 'password', 'role', 'guru_id'];
+    protected $fillable = ['name', 'username', 'password', 'role', 'status', 'guru_id'];
     protected $hidden = ['password', 'remember_token'];
 
     public function guru(): BelongsTo { return $this->belongsTo(Guru::class); }

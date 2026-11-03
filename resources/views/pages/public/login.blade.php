@@ -3,6 +3,10 @@
 <head>
     @include('partials.header')
     <link rel="stylesheet" href="{{ asset('assets/css/login.css') }}">
+    <style>
+        .lg-card-logo { display: flex; justify-content: center; margin-bottom: 14px; }
+        .lg-card-logo img { width: 84px; height: 84px; object-fit: contain; }
+    </style>
 </head>
 <body class="login-body">
 
@@ -10,12 +14,12 @@
 
     {{-- ============ PANEL KIRI ============ --}}
     <aside class="lg-left">
-        <div class="lg-left-bg" style="background-image: url('{{ asset('assets/images/hero.jpg') }}');"></div>
+        <div class="lg-left-bg" style="background-image: url('{{ asset('storage/publik/hero-1.jpg') }}');"></div>
         <div class="lg-left-overlay"></div>
 
         <div class="lg-left-inner">
             <a href="{{ route('beranda') }}" class="lg-brand">
-                <span class="lg-brand-logo"><img src="{{ asset('assets/images/logo.png') }}" alt="Logo SMKN 9 Luwu"></span>
+                <span class="lg-brand-logo"><img src="{{ asset('storage/publik/logo.png') }}" alt="Logo SMKN 9 Luwu"></span>
                 <span class="lg-brand-name">SMKN 9 LUWU</span>
             </a>
 
@@ -48,6 +52,9 @@
             <a href="{{ route('beranda') }}" class="lg-back"><i data-lucide="arrow-left"></i> Kembali ke beranda</a>
 
             <div class="lg-card">
+                <div class="lg-card-logo">
+                    <img src="{{ asset('storage/publik/logo.png') }}" alt="Logo SMKN 9 Luwu">
+                </div>
                 <span class="lg-eyebrow">MASUK</span>
                 <h2>Masuk ke akun</h2>
                 <p class="lg-sub">Gunakan akun yang diberikan oleh admin sekolah.</p>

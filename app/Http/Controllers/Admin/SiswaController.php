@@ -30,7 +30,7 @@ class SiswaController extends Controller
             }))
             ->when($request->kelas, fn ($q, $k) => $q->whereHas('kelas', fn ($w) => $w->where('nama_kelas', $k)))
             ->orderBy('id')
-            ->paginate(5)
+            ->paginate(15)
             ->withQueryString();
 
         $kelasOpsi = array_keys(self::KELAS_OPSI);

@@ -9,7 +9,7 @@
 
 <aside class="adm-sidebar" id="admSidebar">
     <a href="{{ route('guru.dashboard') }}" class="adm-brand">
-        <span class="adm-brand-logo"><img src="{{ asset('assets/images/logo.png') }}" alt="Logo"></span>
+        <span class="adm-brand-logo"><img src="{{ asset('storage/publik/logo.png') }}" alt="Logo SMKN 9 Luwu"></span>
         <span class="adm-brand-text">
             <strong>SMKN 9 Luwu</strong>
             <small>Monitoring Absensi</small>

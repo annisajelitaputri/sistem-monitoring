@@ -22,6 +22,6 @@ class KegiatanController extends Controller
     {
         abort_unless(strtolower($kegiatan->status) === 'terbit', 404);
 
-        return view('pages.public.kegiatan-detail', compact('kegiatan'));
+        return view('pages.public.detail-kegiatan', compact('kegiatan'));
     }
 }

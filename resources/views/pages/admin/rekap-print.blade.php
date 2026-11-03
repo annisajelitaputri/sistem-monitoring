@@ -1,42 +1,53 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <title>Rekap kehadiran {{ $f['jenis'] }} - {{ $f['label'] }}</title>
+    <meta charset="utf-8">
+    <title>Rekap kehadiran {{ $jenis }} - {{ $namaBulan }} {{ $tahun }}</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; color: #111; margin: 24px; }
-        h1 { font-size: 18px; margin: 0 0 4px; }
-        p { margin: 0 0 14px; color: #444; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #999; padding: 6px 8px; text-align: left; }
-        th { background: #e9eefc; }
-        td.c, th.c { text-align: center; }
-        @media print { body { margin: 0; } }
+        @page { margin: 10mm; }
+        body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 8px; color: #111; }
+        h2 { margin: 0 0 6px; font-size: 14px; }
+        .meta { margin-bottom: 10px; line-height: 1.5; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #444; padding: 2px 1px; text-align: center; }
+        td.nama { text-align: left; white-space: nowrap; padding-left: 4px; }
+        .libur { background: #ddd; }
     </style>
 </head>
-<body onload="window.print()">
-    <h1>Rekap Kehadiran {{ $f['jenis'] === 'guru' ? 'Guru' : 'Siswa' }} - SMKN 9 Luwu</h1>
-    <p>Periode: {{ $f['label'] }} | Dicetak: {{ now()->format('d-m-Y H:i') }}</p>
+<body>
+    <h2>Rekap Kehadiran {{ $jenis === 'guru' ? 'Guru' : 'Siswa' }}</h2>
+    <div class="meta">
+        @if ($jenis === 'siswa')
+            Kelas: {{ $kelas->nama_kelas ?? '-' }} &nbsp;|&nbsp; Mapel: {{ $mapel->nama ?? '-' }}<br>
+        @endif
+        Periode: {{ $namaBulan }} {{ $tahun }}
+    </div>
 
     <table>
         <thead>
         <tr>
-            <th class="c">No</th><th>Nama</th>
-            <th class="c">H</th><th class="c">S</th><th class="c">I</th><th class="c">A</th>
-            <th class="c">Total</th><th class="c">% Hadir</th>
+            <th>No</th>
+            <th>Nama</th>
+            @foreach ($hari as $h)
+                <th class="{{ $h['libur'] ? 'libur' : '' }}">{{ $h['tgl'] }}</th>
+            @endforeach
+            <th>H</th><th>S</th><th>I</th><th>A</th><th>Total</th><th>%</th>
         </tr>
         </thead>
         <tbody>
         @foreach ($rows as $i => $r)
             <tr>
-                <td class="c">{{ $i + 1 }}</td>
-                <td>{{ $r['nama'] }}</td>
-                <td class="c">{{ $r['h'] }}</td>
-                <td class="c">{{ $r['s'] }}</td>
-                <td class="c">{{ $r['i'] }}</td>
-                <td class="c">{{ $r['a'] }}</td>
-                <td class="c">{{ $r['total'] }}</td>
-                <td class="c">{{ $r['persen'] }}%</td>
+                <td>{{ $i + 1 }}</td>
+                <td class="nama">{{ $r['nama'] }}</td>
+                @foreach ($hari as $h)
+                    <td class="{{ $h['libur'] ? 'libur' : '' }}">{{ $r['cells'][$h['tgl']] ?? '' }}</td>
+                @endforeach
+                <td>{{ $r['h'] }}</td>
+                <td>{{ $r['s'] }}</td>
+                <td>{{ $r['i'] }}</td>
+                <td>{{ $r['a'] }}</td>
+                <td>{{ $r['total'] }}</td>
+                <td>{{ $r['persen'] }}%</td>
             </tr>
         @endforeach
         </tbody>

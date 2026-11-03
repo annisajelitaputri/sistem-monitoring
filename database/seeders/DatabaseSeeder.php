@@ -14,52 +14,61 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Akun Admin/TU (password: admin123)
-        User::create([
-            'name' => 'Admin TU',
-            'username' => 'admin',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
+               // Akun Admin/TU (password: admin123)
+        User::updateOrCreate(
+            ['username' => 'admin'],
+            [
+                'name'     => 'Admin TU',
+                'password' => Hash::make('admin123'),
+                'role'     => 'admin',
+                'status'   => 'aktif',
+            ]
+        );
 
-        // Contoh guru + akun guru
-        $guru = Guru::create([
-            'nip' => '198501012010011001',
-            'nama' => 'Armanto, S.Pd',
-            'jabatan' => 'Wali Kelas',
-            'mapel' => 'PKN',
-            'status' => 'aktif',
-        ]);
-        User::create([
-            'name' => $guru->nama,
-            'username' => $guru->nip,
-            'password' => Hash::make('guru123'),
-            'role' => 'guru',
-            'guru_id' => $guru->id,
-        ]);
+        // Contoh guru + akun guru (password: guru123)
+        // jabatan dan mapel berupa array karena model Guru memakai cast array
+        $guru = Guru::updateOrCreate(
+            ['nip' => '198501012010011001'],
+            [
+                'nama'    => 'Armanto, S.Pd',
+                'jabatan' => ['Wali Kelas'],
+                'mapel'   => ['PKN'],
+                'status'  => 'aktif',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['username' => $guru->nip],
+            [
+                'name'     => $guru->nama,
+                'password' => Hash::make('guru123'),
+                'role'     => 'guru',
+                'status'   => 'aktif',
+                'guru_id'  => $guru->id,
+            ]
+        );
 
         // Contoh kelas + siswa
-        $kelas = Kelas::create([
-            'nama_kelas' => 'X TKJ',
-            'jurusan' => 'Teknik Komputer dan Jaringan',
-            'tahun_ajaran' => '2026/2027',
-            'wali_kelas_id' => $guru->id,
-        ]);
-        Siswa::create([
-            'nis' => '20250001',
-            'nama' => 'Contoh Siswa',
-            'jenis_kelamin' => 'L',
-            'kelas_id' => $kelas->id,
-            'status' => 'aktif',
-        ]);
+        $kelas = Kelas::updateOrCreate(
+            ['nama_kelas' => 'X TKJ'],
+            [
+                'jurusan'       => 'Teknik Komputer dan Jaringan',
+                'tahun_ajaran'  => '2026/2027',
+                'wali_kelas_id' => $guru->id,
+            ]
+        );
 
-        ProfilSekolah::create([
-            'nama_sekolah' => 'SMKN 9 Luwu',
-            'visi' => 'Siap, Terampil dan Berkarakter, menuju lapangan kerja dan peradaban era globalisasi.',
-            'misi' => 'Membangun potensi siswa melalui pendidikan kejuruan berbasis praktik dan teknologi.',
-            'alamat' => 'Jl. Poros Walenrang Utara, Kab. Luwu, Sulawesi Selatan',
-            'telepon' => '-',
-            'email' => '-',
-        ]);
+        Siswa::updateOrCreate(
+            ['nis' => '20250001'],
+            [
+                'nama'          => 'Contoh Siswa',
+                'jenis_kelamin' => 'L',
+                'kelas_id'      => $kelas->id,
+                'status'        => 'aktif',
+            ]
+        );
+
+        // ProfilSekolah::create([ ... ]) dan seterusnya: biarkan seperti semula
+    
     }
 }

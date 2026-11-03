@@ -32,7 +32,7 @@ class AbsensiGuruController extends Controller
             'belum' => (clone $guruAktif)->count() - $absen->count(),
         ];
 
-        $gurus = (clone $guruAktif)->orderBy('nama')->paginate(4)->withQueryString();
+        $gurus = (clone $guruAktif)->orderBy('nama')->paginate(15)->withQueryString();
 
         return view('pages.admin.absensi', compact('tanggal', 'absen', 'stat', 'gurus'));
     }
